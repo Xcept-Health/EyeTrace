@@ -3,6 +3,7 @@ Tests for pupil.area_ratio module.
 """
 
 import pytest
+import numpy as np
 from eyetrace.pupil import pupil_iris_area_ratio
 
 def test_pupil_iris_area_ratio():

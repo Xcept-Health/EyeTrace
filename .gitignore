@@ -211,4 +211,7 @@ __marimo__/
 
 demo_pupil.py
 
-generate_test_file.py
+*.so
+*.pyd
+
+src/eyetrace/**/*_cy.c

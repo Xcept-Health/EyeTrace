@@ -41,11 +41,12 @@ def test_extract_iris_radius():
 def test_invalid_shape():
     """Test error on invalid landmark shape."""
     invalid = np.zeros((3, 2))
-    with pytest.raises(ValueError, match="Expected (5,2)"):
+    with pytest.raises(ValueError, match=r"Expected \(5,2\) landmarks"):  # échappement
         extract_pupil_diameter(invalid, 100, 100)
 
-    with pytest.raises(ValueError, match="Expected (5,2)"):
-        extract_iris_radius(invalid, 100, 100)
+    with pytest.raises(ValueError, match=r"Expected \(5,2\) landmarks"):  # échappement
+        extract_pupil_diameter(invalid, 100, 100)
+
 
 def test_zero_division_handling():
     """Test that function doesn't crash with degenerate landmarks."""

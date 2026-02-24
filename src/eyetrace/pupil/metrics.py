@@ -63,6 +63,8 @@ def coefficient_variation(diameters: Union[List[float], np.ndarray]) -> float:
     """
     
     arr = np.asarray(diameters, dtype=np.float64)
+    if len(arr) < 2:
+        return 0.0
     mean = np.mean(arr)
     if mean == 0:
         return 0.0
