@@ -2,11 +2,57 @@ from setuptools import setup, find_packages, Extension
 from Cython.Build import cythonize
 import numpy as np
 
-
+# Liste de toutes les extensions Cython du projet
 extensions = [
+    # Pupil
+    Extension(
+        "eyetrace.pupil._metrics_cy",
+        ["src/eyetrace/pupil/_metrics_cy.pyx"],
+        include_dirs=[np.get_include()],
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
+    ),
+    Extension(
+        "eyetrace.pupil._dynamics_cy",
+        ["src/eyetrace/pupil/_dynamics_cy.pyx"],
+        include_dirs=[np.get_include()],
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
+    ),
+    Extension(
+        "eyetrace.pupil._area_ratio_cy",
+        ["src/eyetrace/pupil/_area_ratio_cy.pyx"],
+        include_dirs=[np.get_include()],
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
+    ),
+    # Eyelids
     Extension(
         "eyetrace.eyelids._ear_cy",
         ["src/eyetrace/eyelids/_ear_cy.pyx"],
+        include_dirs=[np.get_include()],
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
+    ),
+    # Gaze
+    Extension(
+        "eyetrace.gaze._saccades_cy",
+        ["src/eyetrace/gaze/_saccades_cy.pyx"],
+        include_dirs=[np.get_include()],
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
+    ),
+    Extension(
+        "eyetrace.gaze._fixation_cy",
+        ["src/eyetrace/gaze/_fixation_cy.pyx"],
+        include_dirs=[np.get_include()],
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
+    ),
+    # Signal Analysis
+    Extension(
+        "eyetrace.signal_analysis._entropy_cy",
+        ["src/eyetrace/signal_analysis/_entropy_cy.pyx"],
+        include_dirs=[np.get_include()],
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
+    ),
+    Extension(
+        "eyetrace.signal_analysis._lempel_ziv_cy",
+        ["src/eyetrace/signal_analysis/_lempel_ziv_cy.pyx"],
         include_dirs=[np.get_include()],
         define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
     ),
@@ -16,7 +62,7 @@ setup(
     name="eyetrace",
     version="0.1.0",
     description="Open-source toolkit for ocular metrics and fatigue detection",
-    author="Votre Nom",
+    author="Fildouindé Ariel Shadrac OUEDRAOGO",
     author_email="arielshadrac@gmail.com",
     url="https://github.com/Xcept-Health/EyeTrace.git",
     packages=find_packages(where="src"),
