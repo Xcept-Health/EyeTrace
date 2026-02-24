@@ -1,9 +1,11 @@
-"""Fixtures partagées pour les tests."""
+"""
+Shared fixtures for tests.
+"""
 
 import pytest
 import numpy as np
 
 @pytest.fixture
 def sample_data():
-    """Données d'exemple pour les tests."""
+    """Example data for tests."""
     return np.random.randn(100)
