@@ -196,4 +196,106 @@ Check the [CONTRIBUTING.md](CONTRIBUTING.md) guide to get started.
 
 ---
 
+
+src/
+└── eyetrace/
+    ├── pupil/                  # Module I : Dynamique pupillaire
+    │   ├── __init__.py         # Expose l'API publique, import conditionnel
+    │   ├── features.py         # Implémentations Python pures (variance, std, CV, NPD, etc.)
+    │   ├── _features_cy.pyx    # Optimisations Cython pour les fonctions critiques
+    │   ├── constriction.py     # Détection des phases de constriction/dilatation (Python)
+    │   ├── _constriction_cy.pyx# Version Cython des algorithmes de détection
+    │   ├── hippus.py           # Calcul de l'amplitude de l'hippus (Python)
+    │   ├── _hippus_cy.pyx      # Version Cython (filtrage, FFT)
+    │   ├── zscore.py           # Normalisation Z‑Score (Python)
+    │   ├── _zscore_cy.pyx      # Optionnel (peut rester en Python si simple)
+    │   ├── derivative.py       # Dérivée première (Python)
+    │   ├── _derivative_cy.pyx  # Version Cython pour calcul en temps réel
+    │   ├── area_ratio.py       # Ratio surface pupille/iris (Python)
+    │   └── _area_ratio_cy.pyx  # Optimisation Cython (calcul de rayons)
+    │
+    ├── eyelids/                 # Module II : Paupières et clignements
+    │   ├── __init__.py
+    │   ├── ear.py               # EAR (Python pur) – déjà créé
+    │   ├── _ear_cy.pyx          # EAR (Cython)
+    │   ├── perclos.py           # PERCLOS (Python)
+    │   ├── _perclos_cy.pyx      # PERCLOS (Cython)
+    │   ├── blink_detection.py   # Détection des clignements, fréquence, MCD (Python)
+    │   ├── _blink_detection_cy.pyx # Optimisation Cython
+    │   ├── eyelid_speed.py      # Vitesses de fermeture/réouverture (Python)
+    │   ├── _eyelid_speed_cy.pyx # Cython
+    │   ├── long_blink.py        # Ratio clignements longs (Python)
+    │   ├── symmetry.py          # Symétrie oculaire (Python)
+    │   ├── jerk.py              # Taux de changement de l'EAR (Python)
+    │   ├── microsleep.py        # Indicateur de micro‑sommeil (Python)
+    │   └── _microsleep_cy.pyx   # Cython (si nécessaire)
+    │
+    ├── gaze/                     # Module III : Mouvements du regard
+    │   ├── __init__.py
+    │   ├── saccades.py           # Détection, vitesse, accélération (Python)
+    │   ├── _saccades_cy.pyx      # Cython (boucles de détection)
+    │   ├── fixation.py           # Durée, dispersion, centroïde (Python)
+    │   ├── _fixation_cy.pyx      # Cython
+    │   ├── entropy.py            # Entropie de Shannon du regard (Python)
+    │   ├── _entropy_cy.pyx       # Cython (calcul de distribution)
+    │   ├── ratio.py              # Ratio saccade/fixation (Python)
+    │   ├── vector_3d.py          # Vecteur de regard 3D (Python)
+    │   ├── vergence.py           # Vitesse de vergence (Python)
+    │   ├── _vergence_cy.pyx      # Cython
+    │   ├── eccentricity.py       # Excentricité pupillaire (Python)
+    │   └── _eccentricity_cy.pyx  # Cython
+    │
+    ├── head_pose/                 # Module IV : Posture et visage
+    │   ├── __init__.py
+    │   ├── angles.py              # Pitch, roll, yaw (Python, avec solvePnP)
+    │   ├── _angles_cy.pyx         # Cython (si optimisations possibles)
+    │   ├── angular_velocity.py    # Vitesse angulaire (Python)
+    │   ├── mar.py                 # Mouth Aspect Ratio (Python)
+    │   ├── _mar_cy.pyx            # Cython
+    │   ├── yawning.py             # Fréquence de bâillement (Python)
+    │   ├── nose_stability.py      # Stabilité du nez (Python)
+    │   ├── neck_angle.py          # Angle de flexion du cou (Python)
+    │   ├── ipd.py                 # Distance inter‑pupillaire (Python)
+    │   ├── _ipd_cy.pyx            # Cython
+    │   ├── postural_sag.py        # Affaissement postural (Python)
+    │   └── _postural_sag_cy.pyx   # Cython
+    │
+    ├── signal_analysis/            # Module V : Analyse avancée
+    │   ├── __init__.py
+    │   ├── fourier.py              # FFT, ratios de puissance (Python, utilise scipy/numpy)
+    │   ├── _fourier_cy.pyx         # Éventuellement des parties personnalisées
+    │   ├── entropy.py              # Sample Entropy (Python)
+    │   ├── _entropy_cy.pyx         # Cython (boucles critiques)
+    │   ├── hurst.py                # Exposant de Hurst (Python)
+    │   ├── _hurst_cy.pyx           # Cython
+    │   ├── lempel_ziv.py           # Complexité LZ (Python)
+    │   ├── _lempel_ziv_cy.pyx      # Cython
+    │   ├── higuchi.py              # Dimension fractale de Higuchi (Python)
+    │   ├── _higuchi_cy.pyx         # Cython
+    │   ├── mutual_info.py          # Information mutuelle G/D (Python)
+    │   ├── _mutual_info_cy.pyx     # Cython
+    │   ├── snr.py                  # Rapport signal/bruit (Python)
+    │   ├── trend.py                # Pente de dérive (Python)
+    │   ├── kss.py                  # Modèle KSS (Python)
+    │   └── _kss_cy.pyx             # Optionnel (si le modèle est simple, pas nécessaire)
+    │
+    ├── io/                          # Entrées/sorties
+    │   ├── __init__.py
+    │   ├── video.py                 # Lecture vidéo, webcam
+    │   ├── csv_exporter.py          # Export des métriques au format CSV
+    │   └── hdf5_exporter.py         # Export HDF5 (optionnel)
+    │
+    ├── visualization/               # Visualisation
+    │   ├── __init__.py
+    │   ├── live_plot.py             # Affichage temps réel des métriques
+    │   ├── gaze_overlay.py          # Superposition du regard sur l'image
+    │   └── dashboard.py             # Tableau de bord complet
+    │
+    └── utils/                        # Fonctions utilitaires transversales
+        ├── __init__.py
+        ├── landmarks.py              # Extraction des landmarks MediaPipe
+        ├── filtering.py              # Filtres (Kalman, moving average)
+        ├── geometry.py               # Calculs géométriques (angles, distances)
+        └── math_helpers.py           # Fonctions mathématiques diverses
+
 *This roadmap is a living document and may evolve based on community feedback and technological advances. Last updated: February 2026.*
