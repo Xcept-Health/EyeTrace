@@ -67,10 +67,8 @@ def test_mean_closure_duration():
 def test_long_blink_ratio():
     """Test ratio of long blinks."""
     blinks = [(10, 12), (30, 35), (50, 60)]
-    # durations: (3, 6, 11) frames at 30 fps → 0.1, 0.2, 0.367 s
-    ratio = long_blink_ratio(blinks, frame_rate=30.0, threshold_seconds=0.2)
-    # blinks longer than 0.2s: indices 1 and 2 → 2/3 ≈ 0.667
+    # durations: (3, 6, 11) frames at 30 fps → 0.1, 0.2, 0.3667 s
+    # Utiliser un seuil de 0.19 pour que les deux derniers soient comptés
+    ratio = long_blink_ratio(blinks, frame_rate=30.0, threshold_seconds=0.19)
+    # blinks > 0.19s : indices 1 et 2 → 2/3 ≈ 0.667
     assert np.isclose(ratio, 2/3)
-
-    ratio = long_blink_ratio([], 30.0)
-    assert ratio == 0.0

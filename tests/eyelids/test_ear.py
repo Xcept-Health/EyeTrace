@@ -62,9 +62,10 @@ def test_ear_zero_horizontal():
 
 
 def test_ear_invalid_shape():
-    """Test error on invalid input shape."""
-    with pytest.raises(ValueError, match="Expected (6, 2)"):
-        eye_aspect_ratio(np.zeros((5, 2)))
+    """Test error on invalid input shape (Python version)."""
+    from eyetrace.eyelids.ear import eye_aspect_ratio as py_ear
+    with pytest.raises(ValueError, match=r"Expected \(6, 2\) landmarks, got \(5, 2\)"):
+        py_ear(np.zeros((5, 2)))
 
 
 @pytest.mark.skipif(not HAS_CYTHON_EAR, reason="Cython version not compiled")

@@ -30,8 +30,7 @@ def test_ear_jerk_parabolic():
     t = np.arange(100) / 30.0
     ear = 0.1 + 0.1 * t**2   # quadratic
     jerk = ear_jerk(ear, t, smooth=False)
-    # Second derivative should be constant 0.2 (since ear'' = 0.2)
-    # Actually derivative of t^2 is 2t, second derivative is 2, scaled by 0.1 → 0.2
+    # Second derivative should be constant 0.2
     expected_jerk = np.ones_like(t) * 0.2
-    # Due to numerical differentiation, we need tolerance
-    np.testing.assert_allclose(jerk[1:-1], expected_jerk[1:-1], rtol=0.1)
+    # Ignorer les 2 premiers et 2 derniers points à cause des effets de bord
+    np.testing.assert_allclose(jerk[2:-2], expected_jerk[2:-2], rtol=0.1)
