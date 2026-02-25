@@ -1,45 +1,22 @@
-utils package
-=============
+.. _utils:
 
-Submodules
-----------
+Utilities Module
+================
 
-utils.filtering module
-----------------------
-
-.. automodule:: utils.filtering
+.. automodule:: eyetrace.utils
    :members:
    :undoc-members:
    :show-inheritance:
 
-utils.geometry module
----------------------
+The `utils` module provides low-level helper functions used across
+EyeTrace. It includes landmark extraction, signal filtering, geometric
+calculations, and general mathematical tools.
 
-.. automodule:: utils.geometry
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 1
+   :caption: Submodules
 
-utils.landmarks module
-----------------------
-
-.. automodule:: utils.landmarks
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-utils.math\_helpers module
---------------------------
-
-.. automodule:: utils.math_helpers
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   utils.landmarks
+   utils.filtering
+   utils.geometry
+   utils.math_helpers

@@ -1,14 +1,14 @@
-eyetrace
-========
+API Reference
+=============
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
+   pupil
    eyelids
    gaze
    head_pose
-   io
-   pupil
    signal_analysis
+   io
    utils
    visualization

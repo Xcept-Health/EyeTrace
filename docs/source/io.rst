@@ -1,37 +1,20 @@
-io package
-==========
+.. _io:
 
-Submodules
-----------
+Input/Output Module
+===================
 
-io.csv\_exporter module
------------------------
-
-.. automodule:: io.csv_exporter
+.. automodule:: eyetrace.io
    :members:
    :undoc-members:
    :show-inheritance:
 
-io.hdf5\_exporter module
-------------------------
+The `io` module provides classes and functions for reading video sources
+(webcam, video files) and exporting metrics to various formats (CSV, HDF5).
 
-.. automodule:: io.hdf5_exporter
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 1
+   :caption: Submodules
 
-io.video module
----------------
-
-.. automodule:: io.video
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: io
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   io.video
+   io.csv_exporter
+   io.hdf5_exporter

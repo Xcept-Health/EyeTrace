@@ -1,85 +1,27 @@
-signal\_analysis package
-========================
+.. _signal_analysis:
 
-Submodules
-----------
+Signal Analysis Module
+======================
 
-signal\_analysis.entropy module
--------------------------------
-
-.. automodule:: signal_analysis.entropy
+.. automodule:: eyetrace.signal_analysis
    :members:
    :undoc-members:
    :show-inheritance:
 
-signal\_analysis.fourier module
--------------------------------
+This module provides advanced signal processing tools for physiological time
+series, including spectral analysis, entropy measures, fractal analysis,
+memory estimation, synchronization, and signal quality assessment.
 
-.. automodule:: signal_analysis.fourier
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 1
+   :caption: Submodules
 
-signal\_analysis.higuchi module
--------------------------------
-
-.. automodule:: signal_analysis.higuchi
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-signal\_analysis.hurst module
------------------------------
-
-.. automodule:: signal_analysis.hurst
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-signal\_analysis.kss module
----------------------------
-
-.. automodule:: signal_analysis.kss
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-signal\_analysis.lempel\_ziv module
------------------------------------
-
-.. automodule:: signal_analysis.lempel_ziv
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-signal\_analysis.mutual\_info module
-------------------------------------
-
-.. automodule:: signal_analysis.mutual_info
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-signal\_analysis.snr module
----------------------------
-
-.. automodule:: signal_analysis.snr
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-signal\_analysis.trend module
------------------------------
-
-.. automodule:: signal_analysis.trend
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: signal_analysis
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   signal_analysis.fourier
+   signal_analysis.entropy
+   signal_analysis.hurst
+   signal_analysis.lempel_ziv
+   signal_analysis.higuchi
+   signal_analysis.mutual_info
+   signal_analysis.snr
+   signal_analysis.trend
+   signal_analysis.kss

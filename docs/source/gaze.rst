@@ -1,69 +1,26 @@
-gaze package
-============
+.. _gaze:
 
-Submodules
-----------
+Gaze Module
+===========
 
-gaze.eccentricity module
-------------------------
-
-.. automodule:: gaze.eccentricity
+.. automodule:: eyetrace.gaze
    :members:
    :undoc-members:
    :show-inheritance:
 
-gaze.entropy module
--------------------
+.. rubric:: Overview
 
-.. automodule:: gaze.entropy
-   :members:
-   :undoc-members:
-   :show-inheritance:
+The gaze module provides tools for analyzing eye movements, including saccades, fixations, gaze entropy, 3D gaze vectors, vergence, and pupil eccentricity. These metrics are essential for studying visual attention, oculomotor control, and neurological conditions.
 
-gaze.fixation module
---------------------
+.. rubric:: Submodules
 
-.. automodule:: gaze.fixation
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 1
+   :caption: Gaze Submodules
 
-gaze.saccades module
---------------------
-
-.. automodule:: gaze.saccades
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-gaze.utils module
------------------
-
-.. automodule:: gaze.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-gaze.vector\_3d module
-----------------------
-
-.. automodule:: gaze.vector_3d
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-gaze.vergence module
---------------------
-
-.. automodule:: gaze.vergence
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: gaze
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   gaze.saccades
+   gaze.fixation
+   gaze.entropy
+   gaze.vector_3d
+   gaze.vergence
+   gaze.eccentricity

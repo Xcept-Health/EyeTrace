@@ -1,0 +1,12 @@
+.. _head_pose.mar:
+
+Mouth Aspect Ratio (MAR)
+========================
+
+.. automodule:: eyetrace.head_pose.mar
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+The MAR function calculates the ratio of mouth height to width, similar to the
+Eye Aspect Ratio (EAR). It is used as a feature for yawning detection.

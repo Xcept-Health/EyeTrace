@@ -1,37 +1,21 @@
-visualization package
-=====================
+.. _visualization:
 
-Submodules
-----------
+Visualization Module
+====================
 
-visualization.dashboard module
-------------------------------
-
-.. automodule:: visualization.dashboard
+.. automodule:: eyetrace.visualization
    :members:
    :undoc-members:
    :show-inheritance:
 
-visualization.gaze\_overlay module
-----------------------------------
+The `visualization` module provides tools for real‑time plotting of metrics,
+overlaying gaze information on video frames, and a comprehensive dashboard
+combining video feed with live graphs.
 
-.. automodule:: visualization.gaze_overlay
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 1
+   :caption: Submodules
 
-visualization.live\_plot module
--------------------------------
-
-.. automodule:: visualization.live_plot
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: visualization
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   visualization.live_plot
+   visualization.gaze_overlay
+   visualization.dashboard

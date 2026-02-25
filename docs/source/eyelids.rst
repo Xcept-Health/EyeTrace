@@ -1,77 +1,68 @@
-eyelids package
-===============
+.. _eyelids-module:
 
-Submodules
-----------
+Eyelids Module
+==============
 
-eyelids.blink\_detection module
--------------------------------
+.. module:: eyetrace.eyelids
+   :synopsis: Eyelid and blink analysis.
 
-.. automodule:: eyelids.blink_detection
-   :members:
-   :undoc-members:
-   :show-inheritance:
+The `eyelids` module provides functions and classes to analyze eyelid movements, detect blinks, compute PERCLOS, measure eyelid speeds, assess symmetry, and detect microsleep events.
 
-eyelids.ear module
-------------------
+**Main features:**
 
-.. automodule:: eyelids.ear
-   :members:
-   :undoc-members:
-   :show-inheritance:
+- Eye Aspect Ratio (EAR) calculation
+- Blink detection and statistics (frequency, duration, long blink ratio)
+- PERCLOS (percentage of eyelid closure)
+- Eyelid closing and opening speeds
+- Eyelid symmetry (correlation between left and right EAR)
+- EAR jerk (rate of change of eyelid movement)
+- Microsleep detection (prolonged eye closure)
 
-eyelids.eyelid\_speed module
-----------------------------
+.. rubric:: Submodules
 
-.. automodule:: eyelids.eyelid_speed
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 1
 
-eyelids.jerk module
--------------------
+   eyelids.ear
+   eyelids.blink_detection
+   eyelids.perclos
+   eyelids.eyelid_speed
+   eyelids.symmetry
+   eyelids.jerk
+   eyelids.microsleep
 
-.. automodule:: eyelids.jerk
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. rubric:: Usage Example
 
-eyelids.microsleep module
--------------------------
+.. code-block:: python
 
-.. automodule:: eyelids.microsleep
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   import cv2
+   import mediapipe as mp
+   from eyetrace.eyelids import eye_aspect_ratio
+   from eyetrace.eyelids.utils import extract_both_eyes
 
-eyelids.perclos module
-----------------------
+   mp_face_mesh = mp.solutions.face_mesh.FaceMesh(refine_landmarks=True)
+   cap = cv2.VideoCapture(0)
 
-.. automodule:: eyelids.perclos
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   while True:
+       ret, frame = cap.read()
+       if not ret:
+           break
+       rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+       results = mp_face_mesh.process(rgb)
+       if results.multi_face_landmarks:
+           h, w, _ = frame.shape
+           left, right = extract_both_eyes(results.multi_face_landmarks[0], w, h)
+           ear = (eye_aspect_ratio(left) + eye_aspect_ratio(right)) / 2.0
+           cv2.putText(frame, f"EAR: {ear:.2f}", (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+       cv2.imshow('EAR Demo', frame)
+       if cv2.waitKey(1) & 0xFF == ord('q'):
+           break
+   cap.release()
+   cv2.destroyAllWindows()
 
-eyelids.symmetry module
------------------------
+.. rubric:: Module Contents
 
-.. automodule:: eyelids.symmetry
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-eyelids.utils module
---------------------
-
-.. automodule:: eyelids.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: eyelids
+.. automodule:: eyetrace.eyelids
    :members:
    :undoc-members:
    :show-inheritance:
