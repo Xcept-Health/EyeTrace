@@ -65,7 +65,7 @@ setup(
     author="Fildouindé Ariel Shadrac OUEDRAOGO",
     author_email="arielshadrac@gmail.com",
     url="https://github.com/Xcept-Health/EyeTrace.git",
-    packages=find_packages(where="src"),
+    packages=find_packages(where="src", include=["eyetrace", "eyetrace.*"]),
     package_dir={"": "src"},
     ext_modules=cythonize(
         extensions,
