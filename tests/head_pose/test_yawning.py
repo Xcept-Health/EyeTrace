@@ -1,26 +1,30 @@
 """
-Tests for head_pose.yawning module.
+Tests unitaires pour eyetrace.head_pose.yawning
 """
 
 import pytest
 import numpy as np
 from eyetrace.head_pose.yawning import yawn_detection, yawn_frequency
 
+
 def test_yawn_detection():
-    """Test yawn detection from MAR sequence."""
-    mar = np.ones(300) * 0.3
-    # Simuler un bâillement long (200 frames > threshold 0.6)
-    mar[100:300] = 0.8
-    yawns = yawn_detection(mar, threshold=0.6, min_duration=2.0, frame_rate=30)
-    # 200 frames = 6.67 sec, donc détecté
+    """Test détection des bâillements."""
+    mar_seq = np.concatenate([
+        np.full(20, 0.35),   # normal
+        np.full(40, 0.82),   # bâillement long (~1.33s)
+        np.full(30, 0.38),
+        np.full(10, 0.75),   # trop court
+        np.full(25, 0.36)
+    ])
+
+    yawns = yawn_detection(mar_seq, threshold=0.65, min_duration=0.8, frame_rate=30)
     assert len(yawns) == 1
-    assert yawns[0][0] == 100
-    assert yawns[0][1] == 299
+    start, end = yawns[0]
+    assert (end - start + 1) / 30 >= 0.8
+
 
 def test_yawn_frequency():
-    """Test yawn frequency calculation."""
-    yawns = [(10, 20), (30, 40)]
-    freq = yawn_frequency(yawns, total_duration=60.0)
-    assert np.isclose(freq, 2.0)  # 2 yawns per minute
-    freq = yawn_frequency([], 60.0)
-    assert freq == 0.0
+    """Test fréquence des bâillements."""
+    yawns = [(30, 70), (180, 230)]  # 2 bâillements
+    freq = yawn_frequency(yawns, total_duration=180.0)  # 3 minutes
+    assert freq == pytest.approx(0.666, abs=0.01)

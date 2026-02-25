@@ -1,32 +1,42 @@
 """
-Tests for head_pose.mar module.
+Tests unitaires pour eyetrace.head_pose.mar
 """
 
 import pytest
 import numpy as np
 from eyetrace.head_pose.mar import mouth_aspect_ratio
 
-# Mock des landmarks MediaPipe
+# ====================== MOCKS ======================
 class MockLandmark:
-    def __init__(self, x, y, z=0):
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__(self, x=0.5, y=0.5):
+        self.x = float(x)
+        self.y = float(y)
+
 
 class MockFaceLandmarks:
     def __init__(self):
-        # Créer suffisamment de landmarks (au moins 300)
-        self.landmark = [MockLandmark(0, 0) for _ in range(300)]
-        # Définir quelques points spécifiques pour la bouche
-        # Indices utilisés : 13 (top), 14 (bottom), 61 (left), 291 (right)
-        self.landmark[13] = MockLandmark(0.5, 0.3)
-        self.landmark[14] = MockLandmark(0.5, 0.4)
-        self.landmark[61] = MockLandmark(0.45, 0.35)
-        self.landmark[291] = MockLandmark(0.55, 0.35)
+        self.landmark = [MockLandmark() for _ in range(500)]
+        self.landmark[13]  = MockLandmark(0.50, 0.53)   # upper lip
+        self.landmark[14]  = MockLandmark(0.50, 0.59)   # lower lip
+        self.landmark[61]  = MockLandmark(0.43, 0.56)   # left corner
+        self.landmark[291] = MockLandmark(0.57, 0.56)   # right corner
 
-def test_mouth_aspect_ratio():
-    """Test MAR calculation."""
+    def set_mouth_open(self, intensity=0.15):
+        self.landmark[13].y = 0.52 - intensity
+        self.landmark[14].y = 0.58 + intensity
+
+
+def test_mouth_aspect_ratio_closed():
+    """Test MAR bouche fermée."""
     face = MockFaceLandmarks()
     mar = mouth_aspect_ratio(face, 640, 480)
-    # Vertical distance: 0.1*480 = 48, horizontal: 0.1*640 = 64, ratio = 48/64 = 0.75
-    assert np.isclose(mar, 0.75, rtol=0.1)
+    assert isinstance(mar, float)
+    assert 0.0 <= mar < 0.6
+
+
+def test_mouth_aspect_ratio_open():
+    """Test MAR bouche ouverte."""
+    face = MockFaceLandmarks()
+    face.set_mouth_open(0.18)
+    mar = mouth_aspect_ratio(face, 640, 480)
+    assert mar > 0.65

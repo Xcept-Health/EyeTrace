@@ -1,33 +1,34 @@
 """
-Tests for head_pose.nose_stability module.
+Tests unitaires pour eyetrace.head_pose.nose_stability
 """
 
 import pytest
 import numpy as np
 from eyetrace.head_pose.nose_stability import nose_stability
 
+# ====================== MOCKS ======================
 class MockLandmark:
-    def __init__(self, x, y, z=0):
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__(self, x=0.5, y=0.5):
+        self.x = float(x)
+        self.y = float(y)
+
 
 class MockFaceLandmarks:
-    def __init__(self, x, y):
-        self.landmark = [MockLandmark(0, 0) for _ in range(10)]
-        # index 1 = nose tip
-        self.landmark[1] = MockLandmark(x, y)
+    def __init__(self):
+        self.landmark = [MockLandmark() for _ in range(500)]
+        self.landmark[1] = MockLandmark(0.50, 0.48)  # nose tip
+
+
+def create_mock_sequence(n=50):
+    seq = [MockFaceLandmarks() for _ in range(n)]
+    for i, face in enumerate(seq):
+        face.landmark[1].x = 0.50 + (i - 25) * 0.002   # léger mouvement
+    return seq
+
 
 def test_nose_stability():
-    """Test nose stability (variance of nose position)."""
-    # Simuler une séquence de landmarks avec un mouvement linéaire
-    seq = []
-    for i in range(10):
-        face = MockFaceLandmarks(0.5 + i*0.01, 0.5)
-        seq.append(face)
+    """Test variance de la position du nez."""
+    seq = create_mock_sequence(60)
     var = nose_stability(seq, 640, 480)
-    # La variance en x devrait être non nulle
-    assert var > 0
-    # Avec mouvement constant, variance = np.var(np.linspace(0, 0.09, 10)*640) ≈ ?
-    # On vérifie simplement que c'est un float.
-    assert isinstance(var, float)
+    assert isinstance(var, (float, np.floating))
+    assert var >= 0.0

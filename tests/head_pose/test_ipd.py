@@ -1,14 +1,16 @@
 """
-Tests for head_pose.ipd module.
+Tests unitaires pour eyetrace.head_pose.ipd
 """
 
 import pytest
 import numpy as np
 from eyetrace.head_pose.ipd import inter_pupillary_distance
 
+
 def test_inter_pupillary_distance():
-    """Test IPD calculation."""
-    left = np.array([100, 200])
-    right = np.array([150, 200])
+    """Test distance inter-pupillaire."""
+    left = np.array([310.0, 240.0])
+    right = np.array([370.0, 240.0])
     ipd = inter_pupillary_distance(left, right)
-    assert np.isclose(ipd, 50.0)
+    assert isinstance(ipd, float)
+    assert ipd == pytest.approx(60.0, abs=0.01)
