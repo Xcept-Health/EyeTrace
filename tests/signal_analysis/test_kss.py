@@ -4,11 +4,21 @@ Tests for signal_analysis.kss module.
 
 import pytest
 import numpy as np
-from eyetrace.signal_analysis.kss import kss_prediction
+from eyetrace.signal_analysis.kss import karlinska_sleepiness_score
 
 def test_kss_prediction():
     """Test KSS prediction (placeholder)."""
-    # À adapter selon l'implémentation réelle
-    features = np.random.randn(10)
-    kss = kss_prediction(features)
-    assert 1 <= kss <= 9 or np.isnan(kss)
+    # Simulate a dictionary of physiological and behavioral features
+    features = {
+        'perclos': 15.0,
+        'blink_frequency': 20.0,
+        'pupil_variance': 0.5,
+        'head_movement': 0.1
+    }
+    kss = karlinska_sleepiness_score(features)
+    # Ensure the Karolinska Sleepiness Scale score is within valid range [1, 9]
+    assert 1 <= kss <= 9
+
+    # Test with an empty dictionary (should return a default baseline value)
+    kss2 = karlinska_sleepiness_score({})
+    assert 1 <= kss2 <= 9

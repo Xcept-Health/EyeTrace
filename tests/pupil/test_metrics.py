@@ -27,7 +27,7 @@ def test_coefficient_variation():
     data = [10, 20, 30, 40, 50]
     assert np.isclose(coefficient_variation(data), 52.7047, rtol=1e-3)
     assert coefficient_variation([0, 0, 0]) == 0.0
-    assert coefficient_variation([5]) == 0.0   # cas d'un seul élément
+    assert coefficient_variation([5]) == 0.0  # single element case
 
 def test_normalized_diameter():
     data = [2, 4, 6]

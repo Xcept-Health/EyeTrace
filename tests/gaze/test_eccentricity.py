@@ -10,7 +10,7 @@ def test_pupil_eccentricity():
     """Test pupil eccentricity (angle correction)."""
     pupil_center = np.array([100, 100])
     iris_center = np.array([102, 100])
-    gaze_vector = np.array([0, 0, 1])  # vecteur de regard factice
+    gaze_vector = np.array([0, 0, 1])  # dummy gaze vector
     eccentricity = pupil_eccentricity(pupil_center, iris_center, gaze_vector)
     assert isinstance(eccentricity, float)
     assert np.isfinite(eccentricity)

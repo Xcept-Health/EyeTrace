@@ -11,6 +11,14 @@ def test_signal_to_noise_ratio():
     t = np.linspace(0, 1, 1000)
     clean = np.sin(2 * np.pi * 10 * t)
     noisy = clean + 0.1 * np.random.randn(1000)
-    snr = signal_to_noise_ratio(clean, noisy)
-    # SNR environ 20 dB (car amplitude bruit 0.1, signal 1)
-    assert 10 < snr < 30
+    
+    # Use the 'smooth' method which estimates SNR from the noisy signal
+    snr = signal_to_noise_ratio(noisy, method='smooth')
+    # Expected linear SNR is around 10 (signal amplitude ~1, noise ~0.1)
+    assert 5 < snr < 20, f"snr={snr}"
+
+    # Test the 'standard' method on a constant signal
+    const = np.ones(100) * 5
+    snr2 = signal_to_noise_ratio(const, method='standard')
+    # Check for infinity or high value depending on zero-division handling
+    assert snr2 == np.inf or snr2 > 100

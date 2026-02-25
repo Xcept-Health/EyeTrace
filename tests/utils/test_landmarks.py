@@ -5,9 +5,9 @@ Tests for utils.landmarks module.
 import pytest
 import numpy as np
 from eyetrace.utils.landmarks import (
-    extract_eye_landmarks,
-    extract_iris_landmarks,
-    extract_face_landmarks
+    extract_eye_landmarks_from_mediapipe,
+    extract_iris_landmarks_from_mediapipe,
+    extract_face_landmarks_array
 )
 
 class MockLandmark:
@@ -23,21 +23,22 @@ class MockFaceLandmarks:
 def test_extract_eye_landmarks():
     """Test extraction of eye landmarks."""
     face = MockFaceLandmarks()
-    left, right = extract_eye_landmarks(face, 640, 480)
+    left = extract_eye_landmarks_from_mediapipe(face, 640, 480, eye='left')
+    right = extract_eye_landmarks_from_mediapipe(face, 640, 480, eye='right')
     assert left.shape == (6, 2)
     assert right.shape == (6, 2)
 
 def test_extract_iris_landmarks():
     """Test extraction of iris landmarks."""
     face = MockFaceLandmarks()
-    left_iris = extract_iris_landmarks(face, 640, 480, eye='left')
-    right_iris = extract_iris_landmarks(face, 640, 480, eye='right')
-    assert left_iris.shape == (5, 2)
-    assert right_iris.shape == (5, 2)
+    left = extract_iris_landmarks_from_mediapipe(face, 640, 480, eye='left')
+    right = extract_iris_landmarks_from_mediapipe(face, 640, 480, eye='right')
+    assert left.shape == (5, 2)
+    assert right.shape == (5, 2)
 
-def test_extract_face_landmarks():
+def test_extract_face_landmarks_array():
     """Test extraction of face landmarks as array."""
     face = MockFaceLandmarks()
-    arr = extract_face_landmarks(face, 640, 480)
+    arr = extract_face_landmarks_array(face, 640, 480)
     assert arr.shape[1] == 2
-    assert arr.shape[0] > 0
+    assert arr.shape[0] == 500  # 'Cause we have 500 dummy landmarks 

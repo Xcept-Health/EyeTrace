@@ -1,5 +1,5 @@
 """
-Tests unitaires pour eyetrace.head_pose.yawning
+Unit tests for eyetrace.head_pose.yawning
 """
 
 import pytest
@@ -8,12 +8,12 @@ from eyetrace.head_pose.yawning import yawn_detection, yawn_frequency
 
 
 def test_yawn_detection():
-    """Test détection des bâillements."""
+    """Test yawn detection."""
     mar_seq = np.concatenate([
         np.full(20, 0.35),   # normal
-        np.full(40, 0.82),   # bâillement long (~1.33s)
+        np.full(40, 0.82),   # long yawn (~1.33s)
         np.full(30, 0.38),
-        np.full(10, 0.75),   # trop court
+        np.full(10, 0.75),   # too short
         np.full(25, 0.36)
     ])
 
@@ -24,7 +24,8 @@ def test_yawn_detection():
 
 
 def test_yawn_frequency():
-    """Test fréquence des bâillements."""
-    yawns = [(30, 70), (180, 230)]  # 2 bâillements
+    """Test yawn frequency."""
+    yawns = [(30, 70), (180, 230)]  # 2 yawns
     freq = yawn_frequency(yawns, total_duration=180.0)  # 3 minutes
+    # Verify rate per minute
     assert freq == pytest.approx(0.666, abs=0.01)

@@ -25,10 +25,12 @@ def test_get_face_landmark_array():
     face = MockFaceLandmarks()
     indices = [1, 2, 3]
     arr = get_face_landmark_array(face, indices, 640, 480)
+    # Ensure correct shape and non-negative coordinates
     assert arr.shape == (3, 2)
     assert np.all(arr >= 0)
 
 def test_face_model_constants():
     """Test that model constants are defined."""
+    # Check that model points and indices match expected geometry
     assert FACE_MODEL_POINTS.shape == (6, 3)
     assert len(FACE_MODEL_INDICES) == 6

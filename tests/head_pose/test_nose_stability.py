@@ -1,5 +1,5 @@
 """
-Tests unitaires pour eyetrace.head_pose.nose_stability
+Unit tests for eyetrace.head_pose.nose_stability
 """
 
 import pytest
@@ -22,12 +22,12 @@ class MockFaceLandmarks:
 def create_mock_sequence(n=50):
     seq = [MockFaceLandmarks() for _ in range(n)]
     for i, face in enumerate(seq):
-        face.landmark[1].x = 0.50 + (i - 25) * 0.002   # léger mouvement
+        face.landmark[1].x = 0.50 + (i - 25) * 0.002   # slight movement
     return seq
 
 
 def test_nose_stability():
-    """Test variance de la position du nez."""
+    """Test variance of the nose position."""
     seq = create_mock_sequence(60)
     var = nose_stability(seq, 640, 480)
     assert isinstance(var, (float, np.floating))
