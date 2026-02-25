@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/yourusername/eyetrace/ci.yml?branch=main)](https://github.com/yourusername/eyetrace/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Xcept-Health/EyeTrace/ci.yml?branch=main)](https://github.com/Xcept-Health/EyeTrace/actions)
 [![Documentation Status](https://readthedocs.org/projects/eyetrace/badge/?version=latest)](https://eyetrace.readthedocs.io/en/latest/?badge=latest)
 
 > **The brain's state is written in your pupils.**  
@@ -72,45 +72,61 @@ For GPU acceleration (MediaPipe), follow the [official instructions](https://goo
 
 ## Quick Start
 
-### Detect blinks in a webcam stream
+### Compute EAR from a webcam stream
 ```python
 import cv2
-from eyetrace.eyelids import EAR, BlinkDetector
+import mediapipe as mp
+from eyetrace.eyelids import eye_aspect_ratio
+from eyetrace.eyelids.utils import extract_both_eyes
+
+mp_face_mesh = mp.solutions.face_mesh
+face_mesh = mp_face_mesh.FaceMesh(refine_landmarks=True)
 
 cap = cv2.VideoCapture(0)
-detector = BlinkDetector(ear_threshold=0.2)
-
-while True:
+while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
         break
-
-    ear = detector.compute_ear(frame)
-    is_blink = detector.detect_blink(ear)
-
-    cv2.putText(frame, f"EAR: {ear:.3f}", (30, 30),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-    if is_blink:
-        cv2.putText(frame, "BLINK!", (30, 60),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
-    cv2.imshow("EyeTrace - Blink Detection", frame)
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    results = face_mesh.process(rgb)
+    if results.multi_face_landmarks:
+        h, w, _ = frame.shape
+        left, right = extract_both_eyes(results.multi_face_landmarks[0], w, h)
+        ear_left = eye_aspect_ratio(left)
+        ear_right = eye_aspect_ratio(right)
+        ear_avg = (ear_left + ear_right) / 2.0
+        cv2.putText(frame, f"EAR: {ear_avg:.3f}", (30, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+    cv2.imshow('EyeTrace - EAR', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-
 cap.release()
 cv2.destroyAllWindows()
 ```
 
 ### Extract pupil diameter from a video file
 ```python
-from eyetrace.pupil import PupilTracker
+from eyetrace.pupil import extract_pupil_diameter
 from eyetrace.io import VideoReader
+from eyetrace.utils.landmarks import extract_iris_landmarks_from_mediapipe
+import mediapipe as mp
 
-with VideoReader("subject_01.mp4") as video, PupilTracker() as tracker:
-    for frame in video:
-        diameter = tracker.get_diameter(frame)
-        print(f"Frame {video.frame_number}: pupil diameter = {diameter:.2f} px")
+mp_face_mesh = mp.solutions.face_mesh
+with mp_face_mesh.FaceMesh(refine_landmarks=True) as face_mesh:
+    with VideoReader("subject_01.mp4") as video:
+        for frame in video:
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            results = face_mesh.process(rgb)
+            if results.multi_face_landmarks:
+                h, w, _ = frame.shape
+                left_iris = extract_iris_landmarks_from_mediapipe(
+                    results.multi_face_landmarks[0], w, h, eye='left')
+                right_iris = extract_iris_landmarks_from_mediapipe(
+                    results.multi_face_landmarks[0], w, h, eye='right')
+                diam_left = extract_pupil_diameter(left_iris, w, h)
+                diam_right = extract_pupil_diameter(right_iris, w, h)
+                diam = (diam_left + diam_right) / 2.0
+                print(f"Frame {video.frame_count}: pupil diameter = {diam:.2f} px")
 ```
 
 More examples are available in the [`examples/`](examples/) folder.
@@ -125,13 +141,16 @@ More examples are available in the [`examples/`](examples/) folder.
 - `eyetrace.head_pose` – Head orientation (PnP), mouth opening, yawning detection.
 - `eyetrace.signal_analysis` – Time‑series analysis: FFT, entropy, fractal dimension, fusion models.
 - `eyetrace.io` – Video/camera input, data export (CSV, HDF5).
+- `eyetrace.utils` – Landmark extraction, filtering, geometry, and math helpers.
 - `eyetrace.visualization` – Real‑time plotting, gaze overlay, dashboard.
+
+All performance‑critical functions are accelerated with Cython, while pure Python fallbacks ensure compatibility on any system.
 
 ---
 
 ## Documentation
 
-Full API reference, tutorials, and background theory are available at **[eyetrace.readthedocs.io](https://eyetrace.readthedocs.io)**.
+Full API reference, tutorials, and background theory are available at **[eyetrace.readthedocs.io](https://eyetrace.readthedocs.io)** (coming soon).
 
 - [Getting Started](https://eyetrace.readthedocs.io/en/latest/getting_started.html)
 - [Feature Descriptions](https://eyetrace.readthedocs.io/en/latest/features.html)
@@ -165,7 +184,7 @@ Areas where we need help:
 
 ---
 
-## 📄 License
+## License
 
 EyeTrace is licensed under the **MIT License**.  
 See [LICENSE](LICENSE) for the full text.
@@ -181,7 +200,7 @@ If you use EyeTrace in your research, please cite:
   author = {Xcept Health},
   title = {EyeTrace: Open-source toolkit for ocular metrics and fatigue detection},
   year = {2026},
-  url = {https://github.com/yourusername/eyetrace},
+  url = {https://github.com/Xcept-Health/EyeTrace},
   note = {The brain's state is written in your pupils.}
 }
 ```
@@ -198,5 +217,4 @@ If you use EyeTrace in your research, please cite:
 ---
 
 **EyeTrace** – Because the eyes don't lie.  
-🔗 [GitHub](https://github.com/yourusername/eyetrace) | [arielshadrac@gmail.com](mailto:arielshadrac@gmail.com) | 
----
+
