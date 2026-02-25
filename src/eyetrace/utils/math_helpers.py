@@ -24,6 +24,8 @@ def mad_outlier_removal(data, threshold=3.5):
     cleaned : np.ndarray
         Data with outliers replaced by NaN (or original with mask).
     """
+    # Convertir en float pour permettre l'assignation de NaN
+    data = np.asarray(data, dtype=np.float64)
     median = np.median(data)
     mad = np.median(np.abs(data - median))
     if mad == 0:

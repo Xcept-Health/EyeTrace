@@ -4,7 +4,7 @@ Yawning detection based on MAR.
 
 import numpy as np
 from scipy.ndimage import label
-from .mar import mouth_aspect_ratio
+
 
 def yawn_detection(mar_sequence, threshold=0.6, min_duration=1.0, frame_rate=30):
     """
