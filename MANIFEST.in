@@ -1,0 +1,21 @@
+# Include core project files
+include LICENSE
+include README.md
+include pyproject.toml
+
+# Include all Cython source files (essential for user-side compilation)
+recursive-include src/eyetrace *.pyx *.pxd
+
+# Exclude generated C files to keep the source distribution clean
+recursive-exclude src/eyetrace *_cy.c
+
+# Exclude build artifacts and Python bytecode
+recursive-exclude * __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude *.pyd
+
+# Exclude development and notebook files from the final package
+recursive-exclude marimo *
+recursive-exclude tests *
+exclude demo_pupil.py
