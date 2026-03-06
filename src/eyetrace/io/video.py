@@ -1,32 +1,48 @@
 """
-Video capture utilities: reading from files or webcam.
+Video capture utilities: reading from files, webcam, or network streams.
 """
 
 import cv2
 import numpy as np
-from typing import Optional, Generator, Tuple, Union
+from typing import Optional, Generator, Tuple, Union, Any
+import re
 
 class VideoReader:
     """
-    Read frames from a video file.
+    Read frames from a video file or network stream.
 
     Parameters
     ----------
-    path : str
-        Path to the video file.
+    source : str or int
+        Path to video file, camera index (int), or URL (e.g., 'rtsp://...').
     resize : tuple, optional
         If given, (width, height) to resize each frame.
     grayscale : bool, default False
         If True, convert frames to grayscale.
+    **kwargs
+        Additional parameters passed to cv2.VideoCapture (e.g., backend).
     """
-    def __init__(self, path: str, resize: Optional[Tuple[int, int]] = None,
-                 grayscale: bool = False):
-        self.cap = cv2.VideoCapture(path)
-        if not self.cap.isOpened():
-            raise IOError(f"Cannot open video file: {path}")
+    def __init__(self, source: Union[str, int],
+                 resize: Optional[Tuple[int, int]] = None,
+                 grayscale: bool = False,
+                 **kwargs):
+        self.source = source
         self.resize = resize
         self.grayscale = grayscale
+        self.kwargs = kwargs
+        self.cap = None
         self._frame_count = 0
+        self._open_capture()
+
+    def _open_capture(self):
+        """Open the video capture with the given source."""
+        self.cap = cv2.VideoCapture(self.source)
+        if not self.cap.isOpened():
+            raise IOError(f"Cannot open video source: {self.source}")
+        # Apply any additional properties set in kwargs
+        for prop, value in self.kwargs.items():
+            if hasattr(cv2, prop):
+                self.cap.set(getattr(cv2, prop), value)
 
     def __iter__(self) -> Generator[np.ndarray, None, None]:
         """
@@ -42,9 +58,16 @@ class VideoReader:
 
     def __len__(self) -> int:
         """
-        Return total number of frames (if known).
+        Return total number of frames (if known). For live sources, raises error.
         """
+        if self.is_live:
+            raise NotImplementedError("Live sources have no predetermined length")
         return int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    @property
+    def is_live(self) -> bool:
+        """Return True if the source is a live camera or stream."""
+        return isinstance(self.source, int) or self.source.startswith(('rtsp://', 'http://'))
 
     @property
     def frame_count(self) -> int:
@@ -53,8 +76,18 @@ class VideoReader:
 
     @property
     def fps(self) -> float:
-        """Frames per second of the video."""
-        return self.cap.get(cv2.CAP_PROP_FPS)
+        """
+        Frames per second of the video.
+        For live sources, may return an estimate or a default value.
+        """
+        fps = self.cap.get(cv2.CAP_PROP_FPS)
+        if fps <= 0:
+            # Try to get from metadata or fallback
+            if self.is_live:
+                fps = 30.0  # Common fallback for webcams
+            else:
+                fps = 30.0  # arbitrary fallback
+        return fps
 
     @property
     def frame_size(self) -> Tuple[int, int]:
@@ -73,7 +106,9 @@ class VideoReader:
 
     def release(self):
         """Release the video capture."""
-        self.cap.release()
+        if self.cap is not None:
+            self.cap.release()
+            self.cap = None
 
     def __enter__(self):
         return self
@@ -84,41 +119,16 @@ class VideoReader:
 
 class WebcamReader(VideoReader):
     """
-    Read frames from a webcam.
-
-    Parameters
-    ----------
-    camera_id : int, default 0
-        ID of the camera (0 for default).
-    width : int, optional
-        Desired width (if supported by camera).
-    height : int, optional
-        Desired height.
-    resize : tuple, optional
-        If given, (width, height) to resize each frame.
-    grayscale : bool, default False
-        If True, convert frames to grayscale.
+    Convenience class for webcam capture (camera index).
     """
-    def __init__(self, camera_id: int = 0, width: Optional[int] = None,
+    def __init__(self, camera_id: int = 0,
+                 width: Optional[int] = None,
                  height: Optional[int] = None,
                  resize: Optional[Tuple[int, int]] = None,
                  grayscale: bool = False):
-        self.cap = cv2.VideoCapture(camera_id)
-        if not self.cap.isOpened():
-            raise IOError(f"Cannot open camera {camera_id}")
+        kwargs = {}
         if width is not None:
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+            kwargs['CAP_PROP_FRAME_WIDTH'] = width
         if height is not None:
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        self.resize = resize
-        self.grayscale = grayscale
-        self._frame_count = 0
-
-    # __len__ is not meaningful for live camera
-    def __len__(self):
-        raise NotImplementedError("Webcam has no predetermined length")
-
-    @property
-    def fps(self) -> float:
-        """Estimated frames per second (may be approximate)."""
-        return self.cap.get(cv2.CAP_PROP_FPS) or 30.0  # fallback
+            kwargs['CAP_PROP_FRAME_HEIGHT'] = height
+        super().__init__(camera_id, resize=resize, grayscale=grayscale, **kwargs)
