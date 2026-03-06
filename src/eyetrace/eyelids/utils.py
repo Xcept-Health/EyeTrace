@@ -29,8 +29,10 @@ def extract_eye_landmarks_from_mediapipe(face_landmarks, image_width, image_heig
     """
     if eye == 'left':
         indices = LEFT_EYE_INDICES
-    else:
+    elif eye == 'right':
         indices = RIGHT_EYE_INDICES
+    else:
+        raise ValueError("eye must be 'left' or 'right', got '{}'".format(eye))
 
     points = []
     for idx in indices:
