@@ -15,18 +15,24 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install build dependencies
-        run: pip install build
-      - name: Build sdist
-        run: python -m build --sdist
-      - name: Build wheels
+      - name: Install dependencies
+        run: pip install cython numpy setuptools twine wheel
+
+      - name: Build sdist and wheel
+        run: python setup.py sdist bdist_wheel
+
+      - name: Repair wheel to be manylinux compliant
         uses: pypa/cibuildwheel@v2.16.5
         env:
           CIBW_BUILD: "cp310-*"
-          CIBW_ARCHS_LINUX: "x86_64"      
-          CIBW_BUILD_FRONTEND: "build"
-      - name: Publish to PyPI
+          CIBW_ARCHS_LINUX: "x86_64"
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: "auditwheel repair -w {dest_dir} {wheel}"
+
+      - name: Check dist
+        run: ls -la wheelhouse/
+
+      - name: Upload to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-         
           password: ${{ secrets.PYPI_API_TOKEN }}
+          packages_dir: wheelhouse/
