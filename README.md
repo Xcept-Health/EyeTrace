@@ -53,7 +53,7 @@ EyeTrace brings together state‑of‑the‑art computer vision and signal proce
 
 ## Installation
 
-### From PyPI (soon)
+### From PyPI
 ```bash
 pip install eyetrace
 ```
