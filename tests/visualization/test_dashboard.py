@@ -37,3 +37,9 @@ def test_dashboard_update():
     
     # Ensure update runs without raising exceptions
     assert True
+
+def update_plots(self, timestamp: float, values: list):
+    """Update all plots with a new timestamp and corresponding values."""
+    # delegate to whatever your internal update logic is, e.g.:
+    for ax, val in zip(self.axes, values):
+        ax.update(timestamp, val)  
