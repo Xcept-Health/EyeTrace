@@ -7,7 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11'] 
+        python-version: ['3.9', '3.10', '3.11']
+      fail-fast: false
 
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +21,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-glx libglib2.0-0  # Pour OpenCV/MediaPipe
+          sudo apt-get install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1
 
       - name: Cache pip
         uses: actions/cache@v3
@@ -32,11 +33,17 @@ jobs:
 
       - name: Install Python dependencies
         run: |
+          python --version
           pip install --upgrade pip
           pip install cython numpy pytest setuptools
-          # Installez les dépendances de test (ajustez selon vos besoins)
-          pip install opencv-python mediapipe matplotlib scipy
-          pip install -e .  # Compile les extensions Cython
+          # Installer les dépendances de test (ajustez selon vos besoins)
+          pip install opencv-python-headless mediapipe matplotlib scipy
+          # Compiler les extensions Cython (optionnel si fait par -e)
+          python setup.py build_ext --inplace
+          pip install -e .
+
+      - name: Display installed packages
+        run: pip list
 
       - name: Run tests
-        run: pytest tests/
+        run: pytest tests/ -v --tb=short
