@@ -16,10 +16,13 @@ jobs:
           python-version: '3.10'
 
       - name: Install build tools
-        run: pip install cython numpy setuptools build
+        run: pip install cython numpy setuptools
 
       - name: Build sdist only
-        run: python setup.py sdist
+        run: |
+          pip install cython numpy
+          python setup.py sdist --formats=gztar
+          rm -f dist/*.whl
 
       - name: Check dist contents
         run: ls -la dist/
