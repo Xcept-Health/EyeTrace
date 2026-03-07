@@ -22,10 +22,16 @@ jobs:
           pip install --upgrade pip
           pip install cython numpy build
 
+      - name: Clean dist folder
+        run: rm -rf dist/   # Supprime tout l'ancien contenu
+
       - name: Build source distribution only
         run: python -m build --sdist
 
-      - name: Check dist
+      - name: Remove any remaining wheels (safety)
+        run: find dist/ -name "*.whl" -delete
+
+      - name: Check dist (should only contain .tar.gz)
         run: ls -la dist/
 
       - name: Publish to PyPI
