@@ -63,13 +63,16 @@ extensions = [
 
 setup(
     name="eyetrace",
-    version="0.1.0",
+    version="0.1.1",
     description="Open-source toolkit for ocular metrics and fatigue detection",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author="Fildouindé Ariel Shadrac OUEDRAOGO",
     author_email="arielshadrac@gmail.com",
     url="https://github.com/Xcept-Health/EyeTrace.git",
-    packages=find_packages(where="src", include=["eyetrace", "eyetrace.*"]),
+    packages=find_packages(where="src", include=["eyetrace", "eyetrace.*"] ),
     package_dir={"": "src"},
+    include_package_data=True,
     ext_modules=cythonize(
         extensions,
         compiler_directives={"language_level": "3", "boundscheck": False},
@@ -81,6 +84,7 @@ setup(
         "mediapipe>=0.8.0",
         "pandas>=1.3.0",
         "matplotlib>=3.4.0",
+        "Cython>=0.29.0", # Bonne pratique d'ajouter Cython ici
     ],
     python_requires=">=3.8",
     classifiers=[
