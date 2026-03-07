@@ -16,18 +16,16 @@ jobs:
           python-version: '3.10'
 
       - name: Install build tools
-        run: |
-          pip install build cython numpy
-
-      - name: Clean dist
-        run: rm -rf dist/
+        run: pip install cython numpy setuptools build
 
       - name: Build sdist only
-        run: python -m build --sdist
+        run: python setup.py sdist
+
+      - name: Check dist contents
+        run: ls -la dist/
 
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
-          packages-dir: dist/
           skip-existing: true
