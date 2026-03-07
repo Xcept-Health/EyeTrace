@@ -28,6 +28,7 @@ class Dashboard:
     window_name : str, default 'EyeTrace Dashboard'
         Name of the combined OpenCV window.
     """
+
     def __init__(self, video_source, plot_specs: List[Dict[str, Any]],
                  update_interval_ms: int = 50,
                  layout: Literal['horizontal', 'vertical'] = 'horizontal',
@@ -46,6 +47,20 @@ class Dashboard:
         # Will store the current plot image
         self.current_plot_img = None
 
+    def update_plots(self, timestamp: float, values: List[float]):
+        """
+        Update all live plots with a new timestamp and metric values.
+
+        Parameters
+        ----------
+        timestamp : float
+            Current timestamp (e.g., elapsed seconds).
+        values : list of float
+            One value per plot spec, in the same order as plot_specs.
+        """
+        self.plot.update(timestamp, values)
+        self.last_plot_update = timestamp
+
     def _combine_images(self, video_img: np.ndarray, plot_img: np.ndarray) -> np.ndarray:
         """
         Combine video and plot images according to layout.
@@ -53,17 +68,14 @@ class Dashboard:
         """
         # Convert plot to BGR if it's RGB (matplotlib produces RGB)
         if plot_img.shape[2] == 3:
-            # Assume RGB, convert to BGR for OpenCV
             plot_img = cv2.cvtColor(plot_img, cv2.COLOR_RGB2BGR)
 
         if self.layout == 'horizontal':
-            # Resize plot to match video height
             plot_height = video_img.shape[0]
             plot_width = int(plot_img.shape[1] * plot_height / plot_img.shape[0])
             plot_resized = cv2.resize(plot_img, (plot_width, plot_height))
             combined = np.hstack((video_img, plot_resized))
         else:  # vertical
-            # Resize plot to match video width
             plot_width = video_img.shape[1]
             plot_height = int(plot_img.shape[0] * plot_width / plot_img.shape[1])
             plot_resized = cv2.resize(plot_img, (plot_width, plot_height))
@@ -80,7 +92,6 @@ class Dashboard:
             if not self.running:
                 break
 
-            # Process frame
             try:
                 result = process_frame(frame)
             except Exception as e:
@@ -94,20 +105,16 @@ class Dashboard:
             # Update plots (throttled)
             if metrics and len(metrics) == len(self.plot_specs):
                 if timestamp - self.last_plot_update > self.update_interval:
-                    self.plot.update(timestamp, metrics)
-                    # Get the current plot as an image
+                    self.update_plots(timestamp, metrics)
                     self.current_plot_img = self.plot.get_current_figure_as_image()
-                    self.last_plot_update = timestamp
 
             # Combine and display
             if self.current_plot_img is not None:
                 combined = self._combine_images(disp_frame, self.current_plot_img)
                 cv2.imshow(self.window_name, combined)
             else:
-                # Just show video until first plot is ready
                 cv2.imshow(self.window_name, disp_frame)
 
-            # Check for quit key
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False
                 break
