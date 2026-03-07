@@ -4,8 +4,8 @@ Export metrics to CSV files with metadata and buffered writing.
 
 import csv
 import numpy as np
-from typing import Dict, List, Any, Optional, TextIO
-import io
+from typing import Dict, List, Any, Optional
+
 
 class CSVExporter:
     """
@@ -25,6 +25,7 @@ class CSVExporter:
     buffer_size : int, default 0
         Number of rows to buffer before writing to disk. If 0, write immediately.
     """
+
     def __init__(self, filename: str,
                  fieldnames: Optional[List[str]] = None,
                  metadata: Optional[Dict[str, Any]] = None,
@@ -48,7 +49,7 @@ class CSVExporter:
         if self.fieldnames is None:
             self.fieldnames = first_row_keys
         self._writer = csv.DictWriter(self.file, fieldnames=self.fieldnames,
-                                       extrasaction='ignore')
+                                      extrasaction='ignore')
         self._writer.writeheader()
         self._header_written = True
 
@@ -70,9 +71,7 @@ class CSVExporter:
         ----------
         data : dict
             Dictionary with keys as column names and values as numbers/strings.
-            Values must be JSON-serializable (will be converted to string if needed).
         """
-        # Ensure all values are strings for CSV safety
         safe_data = {k: self._serialize(v) for k, v in data.items()}
 
         if self.buffer_size > 0:
@@ -102,14 +101,25 @@ class CSVExporter:
 
     @staticmethod
     def _serialize(value: Any) -> str:
-        """Convert a value to a string suitable for CSV."""
+        """
+        Convert a value to a string suitable for CSV.
+
+        Floats always keep at least one decimal place:
+          0.0  -> '0.0'
+          0.1  -> '0.1'
+          4.5  -> '4.5'
+          1e10 -> '1e+10'  (scientific stays as-is)
+        """
         if isinstance(value, (np.floating, float)):
-            # Use high precision for floats
-            return f"{value:.10f}"
+            s = f"{value:g}"
+            # :g strips trailing zeros but also removes ".0" for whole numbers.
+            # Re-add ".0" when there is no decimal point and no exponent/nan/inf.
+            if '.' not in s and 'e' not in s and 'n' not in s and 'i' not in s:
+                s += '.0'
+            return s
         elif isinstance(value, (np.integer, int)):
-            return str(value)
+            return str(int(value))
         elif isinstance(value, (np.ndarray, list, tuple)):
-            # Join arrays as semicolon-separated strings
             return ";".join(str(x) for x in value)
         elif value is None:
             return ""
