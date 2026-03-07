@@ -7,8 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -17,25 +15,19 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install build dependencies
+      - name: Install dependencies
+        run: pip install cython numpy setuptools twine
+
+      - name: Build sdist only
+        run: python setup.py sdist
+
+      - name: Verify only tar.gz present
         run: |
-          pip install --upgrade pip
-          pip install cython numpy build
+          ls -la dist/
+          test $(ls dist/*.whl 2>/dev/null | wc -l) -eq 0 && echo "OK no wheel" || (echo "WHEEL FOUND - removing" && rm dist/*.whl)
 
-      - name: Clean dist folder
-        run: rm -rf dist/   # Supprime tout l'ancien contenu
-
-      - name: Build source distribution only
-        run: python -m build --sdist
-
-      - name: Remove any remaining wheels (safety)
-        run: find dist/ -name "*.whl" -delete
-
-      - name: Check dist (should only contain .tar.gz)
-        run: ls -la dist/
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          attestations: false
+      - name: Publish
+        run: twine upload dist/*.tar.gz
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
