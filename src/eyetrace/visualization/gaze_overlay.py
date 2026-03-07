@@ -4,14 +4,15 @@ Drawing functions to overlay gaze and eye landmarks on images.
 
 import cv2
 import numpy as np
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional, List, Union
 
 def draw_gaze_overlay(image: np.ndarray,
                       gaze_point: Optional[Tuple[float, float]] = None,
                       left_pupil: Optional[Tuple[float, float]] = None,
                       right_pupil: Optional[Tuple[float, float]] = None,
                       color: Tuple[int, int, int] = (0, 255, 0),
-                      thickness: int = 2) -> np.ndarray:
+                      thickness: int = 2,
+                      copy: bool = True) -> np.ndarray:
     """
     Draw gaze point and pupil centers on an image.
 
@@ -27,13 +28,15 @@ def draw_gaze_overlay(image: np.ndarray,
         BGR color for drawings.
     thickness : int
         Line thickness.
+    copy : bool, default True
+        If True, return a copy; otherwise draw in-place (modify original).
 
     Returns
     -------
     np.ndarray
         Image with overlays.
     """
-    img = image.copy()
+    img = image.copy() if copy else image
 
     if left_pupil is not None:
         cv2.circle(img, tuple(map(int, left_pupil)), 3, color, -1)
@@ -52,7 +55,8 @@ def draw_eye_landmarks(image: np.ndarray,
                        right_eye: Optional[np.ndarray] = None,
                        color_left: Tuple[int, int, int] = (255, 255, 0),
                        color_right: Tuple[int, int, int] = (0, 255, 255),
-                       radius: int = 2) -> np.ndarray:
+                       radius: int = 2,
+                       copy: bool = True) -> np.ndarray:
     """
     Draw the 6 eye landmarks on the image.
 
@@ -66,13 +70,15 @@ def draw_eye_landmarks(image: np.ndarray,
         BGR colors for left and right eye.
     radius : int
         Radius of the circles.
+    copy : bool, default True
+        If True, return a copy; otherwise draw in-place.
 
     Returns
     -------
     np.ndarray
         Image with landmarks.
     """
-    img = image.copy()
+    img = image.copy() if copy else image
     if left_eye is not None:
         for (x, y) in left_eye.astype(int):
             cv2.circle(img, (x, y), radius, color_left, -1)
@@ -87,7 +93,9 @@ def draw_text_overlay(image: np.ndarray,
                       position: Tuple[int, int] = (10, 30),
                       font_scale: float = 0.6,
                       color: Tuple[int, int, int] = (0, 255, 0),
-                      thickness: int = 2) -> np.ndarray:
+                      thickness: int = 2,
+                      line_spacing: int = 25,
+                      copy: bool = True) -> np.ndarray:
     """
     Draw multiple lines of text on the image.
 
@@ -105,16 +113,20 @@ def draw_text_overlay(image: np.ndarray,
         BGR color.
     thickness : int
         Thickness of text.
+    line_spacing : int
+        Vertical spacing between lines.
+    copy : bool, default True
+        If True, return a copy; otherwise draw in-place.
 
     Returns
     -------
     np.ndarray
         Image with text.
     """
-    img = image.copy()
+    img = image.copy() if copy else image
     x, y = position
     for i, line in enumerate(lines):
-        y_pos = y + i * 25
+        y_pos = y + i * line_spacing
         cv2.putText(img, line, (x, y_pos), cv2.FONT_HERSHEY_SIMPLEX,
                     font_scale, color, thickness)
     return img

@@ -1,82 +1,120 @@
 """
-Comprehensive dashboard combining video feed and live plots.
+Comprehensive dashboard combining video feed and live plots in a single window.
 """
 
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from typing import Callable, Optional, Dict, Any
 import time
+from typing import Callable, Optional, Dict, Any, List, Literal
+from .live_plot import MultiLivePlot
 
 
 class Dashboard:
     """
-    A dashboard that shows the video feed alongside live plots.
+    A dashboard that shows the video feed alongside live plots in one window.
 
     Parameters
     ----------
-    video_source : VideoReader or WebcamReader
-        Source of frames.
+    video_source : iterable
+        An iterator yielding frames (e.g., VideoReader or WebcamReader).
     plot_specs : list of dict
-        Specifications for MultiLivePlot.
+        Specifications for MultiLivePlot. Each dict must contain
+        'title', 'ylabel', and optionally 'color'.
     update_interval_ms : int, default 50
         Milliseconds between plot updates (to reduce flicker).
+    layout : str, default 'horizontal'
+        Arrangement of video and plots: 'horizontal' (side by side) or
+        'vertical' (video on top, plots below).
+    window_name : str, default 'EyeTrace Dashboard'
+        Name of the combined OpenCV window.
     """
-    def __init__(self, video_source, plot_specs: list, update_interval_ms: int = 50):
+    def __init__(self, video_source, plot_specs: List[Dict[str, Any]],
+                 update_interval_ms: int = 50,
+                 layout: Literal['horizontal', 'vertical'] = 'horizontal',
+                 window_name: str = 'EyeTrace Dashboard'):
         self.video = video_source
         self.plot_specs = plot_specs
         self.update_interval = update_interval_ms / 1000.0  # seconds
+        self.layout = layout
+        self.window_name = window_name
         self.last_plot_update = 0
+        self.running = False
 
-        # Initialize plot (matplotlib figure)
-        self.fig, self.axes = plt.subplots(len(plot_specs), 1, figsize=(6, 8))
-        if len(plot_specs) == 1:
-            self.axes = [self.axes]
-        self.lines = []
-        for i, spec in enumerate(plot_specs):
-            line, = self.axes[i].plot([], [], spec.get('color', 'b-'))
-            self.lines.append(line)
-            self.axes[i].set_title(spec['title'])
-            self.axes[i].set_ylabel(spec['ylabel'])
-            self.axes[i].grid(True)
-        self.axes[-1].set_xlabel('Time (s)')
-        self.fig.tight_layout()
+        # Create the live plot
+        self.plot = MultiLivePlot(plot_specs, maxlen=200)
 
-        # Convert matplotlib figure to OpenCV image once
-        self.canvas = FigureCanvas(self.fig)
-        self.fig.tight_layout(pad=2)
+        # Will store the current plot image
+        self.current_plot_img = None
 
-        self.data_buffers = [{'x': [], 'y': []} for _ in plot_specs]
+    def _combine_images(self, video_img: np.ndarray, plot_img: np.ndarray) -> np.ndarray:
+        """
+        Combine video and plot images according to layout.
+        Ensures both images have compatible dimensions.
+        """
+        # Convert plot to BGR if it's RGB (matplotlib produces RGB)
+        if plot_img.shape[2] == 3:
+            # Assume RGB, convert to BGR for OpenCV
+            plot_img = cv2.cvtColor(plot_img, cv2.COLOR_RGB2BGR)
 
-    def update_plots(self, x: float, y_values: list):
-        """Add new data points and refresh the figure."""
-        for i, val in enumerate(y_values):
-            self.data_buffers[i]['x'].append(x)
-            self.data_buffers[i]['y'].append(val)
-            # Keep last 200 points
-            if len(self.data_buffers[i]['x']) > 200:
-                self.data_buffers[i]['x'] = self.data_buffers[i]['x'][-200:]
-                self.data_buffers[i]['y'] = self.data_buffers[i]['y'][-200:]
+        if self.layout == 'horizontal':
+            # Resize plot to match video height
+            plot_height = video_img.shape[0]
+            plot_width = int(plot_img.shape[1] * plot_height / plot_img.shape[0])
+            plot_resized = cv2.resize(plot_img, (plot_width, plot_height))
+            combined = np.hstack((video_img, plot_resized))
+        else:  # vertical
+            # Resize plot to match video width
+            plot_width = video_img.shape[1]
+            plot_height = int(plot_img.shape[0] * plot_width / plot_img.shape[1])
+            plot_resized = cv2.resize(plot_img, (plot_width, plot_height))
+            combined = np.vstack((video_img, plot_resized))
+        return combined
 
-        # Update line data
-        for i in range(len(self.plot_specs)):
-            self.lines[i].set_data(self.data_buffers[i]['x'], self.data_buffers[i]['y'])
-            self.axes[i].relim()
-            self.axes[i].autoscale_view()
+    def _process_and_display(self, process_frame: Callable[[np.ndarray], Dict[str, Any]]):
+        """
+        Internal loop: reads frames, calls process_frame, updates video and plots.
+        """
+        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
 
-        # Redraw figure
-        self.canvas.draw()
-        # Convert to numpy array
-        buf = self.canvas.buffer_rgba()
-        plot_img = np.asarray(buf)
-        # Convert RGBA to BGR for OpenCV
-        plot_img = cv2.cvtColor(plot_img, cv2.COLOR_RGBA2BGR)
-        return plot_img
+        for frame in self.video:
+            if not self.running:
+                break
+
+            # Process frame
+            try:
+                result = process_frame(frame)
+            except Exception as e:
+                print(f"Error in process_frame: {e}")
+                continue
+
+            disp_frame = result.get('frame', frame)
+            timestamp = result.get('timestamp', time.time())
+            metrics = result.get('metrics', [])
+
+            # Update plots (throttled)
+            if metrics and len(metrics) == len(self.plot_specs):
+                if timestamp - self.last_plot_update > self.update_interval:
+                    self.plot.update(timestamp, metrics)
+                    # Get the current plot as an image
+                    self.current_plot_img = self.plot.get_current_figure_as_image()
+                    self.last_plot_update = timestamp
+
+            # Combine and display
+            if self.current_plot_img is not None:
+                combined = self._combine_images(disp_frame, self.current_plot_img)
+                cv2.imshow(self.window_name, combined)
+            else:
+                # Just show video until first plot is ready
+                cv2.imshow(self.window_name, disp_frame)
+
+            # Check for quit key
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.running = False
+                break
 
     def run(self, process_frame: Callable[[np.ndarray], Dict[str, Any]]):
         """
-        Main loop: read frames, process, update video and plots.
+        Main loop with exception handling.
 
         Parameters
         ----------
@@ -86,29 +124,24 @@ class Dashboard:
             - 'timestamp': float
             - 'metrics': list of float values matching plot_specs order
         """
-        cv2.namedWindow('Video', cv2.WINDOW_NORMAL)
-        cv2.namedWindow('Plots', cv2.WINDOW_NORMAL)
+        self.running = True
+        try:
+            self._process_and_display(process_frame)
+        except KeyboardInterrupt:
+            print("Dashboard interrupted by user.")
+        except Exception as e:
+            print(f"Dashboard error: {e}")
+        finally:
+            self.close()
 
-        for frame in self.video:
-            start_time = time.time()
-
-            # Process frame
-            result = process_frame(frame)
-            disp_frame = result.get('frame', frame)
-            timestamp = result.get('timestamp', time.time())
-            metrics = result.get('metrics', [])
-
-            # Show video
-            cv2.imshow('Video', disp_frame)
-
-            # Update plots (throttled)
-            if timestamp - self.last_plot_update > self.update_interval:
-                if metrics and len(metrics) == len(self.plot_specs):
-                    plot_img = self.update_plots(timestamp, metrics)
-                    cv2.imshow('Plots', plot_img)
-                    self.last_plot_update = timestamp
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
+    def close(self):
+        """Clean up: close plot and destroy windows."""
+        self.running = False
+        self.plot.close()
         cv2.destroyAllWindows()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()

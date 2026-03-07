@@ -4,7 +4,7 @@ Blink detection and related metrics.
 
 import numpy as np
 from scipy.ndimage import label
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 
 def detect_blinks(ear_sequence: np.ndarray, threshold: float = 0.2,
                   min_interval_frames: int = 10) -> List[Tuple[int, int]]:

@@ -2,7 +2,6 @@
 Karlinska Sleepiness Score (KSS) prediction model.
 """
 
-import numpy as np
 
 def karlinska_sleepiness_score(features):
     """
