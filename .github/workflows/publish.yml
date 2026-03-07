@@ -15,20 +15,18 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
-        run: pip install cython numpy setuptools twine
-
+      - name: Install build dependencies
+        run: pip install build
       - name: Build sdist
-        run: python setup.py sdist
-
-      - name: Remove any wheel
-        run: rm -f dist/*.whl
-
-      - name: Check dist
-        run: ls -la dist/
-
-      - name: Upload to PyPI
-        run: twine upload dist/*.tar.gz
+        run: python -m build --sdist
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.5
         env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          CIBW_BUILD: "cp310-*"
+          CIBW_ARCHS_LINUX: "x86_64"      
+          CIBW_BUILD_FRONTEND: "build"
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+         
+          password: ${{ secrets.PYPI_API_TOKEN }}
