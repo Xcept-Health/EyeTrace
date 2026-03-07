@@ -16,19 +16,19 @@ jobs:
           python-version: '3.10'
 
       - name: Install build tools
-        run: pip install cython numpy setuptools
+        run: pip install cython numpy setuptools twine
 
       - name: Build sdist only
-        run: |
-          pip install cython numpy
-          python setup.py sdist --formats=gztar
-          rm -f dist/*.whl
+        run: python setup.py sdist --formats=gztar
 
-      - name: Check dist contents
+      - name: Remove wheels if any
+        run: find dist/ -name "*.whl" -delete
+
+      - name: Check dist
         run: ls -la dist/
 
-      - name: Publish
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          skip-existing: true
+      - name: Publish with twine
+        run: twine upload dist/*.tar.gz
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
