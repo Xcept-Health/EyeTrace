@@ -2,7 +2,10 @@ from setuptools import setup, find_packages, Extension
 from Cython.Build import cythonize
 import numpy as np
 
-# Liste de toutes les extensions Cython du projet
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+
 extensions = [
     # Pupil
     Extension(

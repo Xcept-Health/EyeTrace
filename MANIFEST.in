@@ -22,3 +22,5 @@ exclude demo_pupil.py
 
 # Include examples so users can run them after installation
 recursive-include examples *.py *.md
+graft examples
+graft docs
