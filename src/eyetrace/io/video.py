@@ -4,8 +4,8 @@ Video capture utilities: reading from files, webcam, or network streams.
 
 import cv2
 import numpy as np
-from typing import Optional, Generator, Tuple, Union, Any
-import re
+from typing import Optional, Generator, Tuple, Union
+
 
 class VideoReader:
     """
@@ -22,6 +22,7 @@ class VideoReader:
     **kwargs
         Additional parameters passed to cv2.VideoCapture (e.g., backend).
     """
+
     def __init__(self, source: Union[str, int],
                  resize: Optional[Tuple[int, int]] = None,
                  grayscale: bool = False,
@@ -39,15 +40,12 @@ class VideoReader:
         self.cap = cv2.VideoCapture(self.source)
         if not self.cap.isOpened():
             raise IOError(f"Cannot open video source: {self.source}")
-        # Apply any additional properties set in kwargs
         for prop, value in self.kwargs.items():
             if hasattr(cv2, prop):
                 self.cap.set(getattr(cv2, prop), value)
 
     def __iter__(self) -> Generator[np.ndarray, None, None]:
-        """
-        Iterate over frames (yield until end).
-        """
+        """Iterate over frames (yield until end)."""
         while True:
             ret, frame = self.cap.read()
             if not ret:
@@ -58,7 +56,8 @@ class VideoReader:
 
     def __len__(self) -> int:
         """
-        Return total number of frames (if known). For live sources, raises error.
+        Return total number of frames (if known).
+        For live sources, raises NotImplementedError.
         """
         if self.is_live:
             raise NotImplementedError("Live sources have no predetermined length")
@@ -67,7 +66,9 @@ class VideoReader:
     @property
     def is_live(self) -> bool:
         """Return True if the source is a live camera or stream."""
-        return isinstance(self.source, int) or self.source.startswith(('rtsp://', 'http://'))
+        if isinstance(self.source, int):
+            return True
+        return self.source.startswith(('rtsp://', 'http://'))
 
     @property
     def frame_count(self) -> int:
@@ -78,15 +79,11 @@ class VideoReader:
     def fps(self) -> float:
         """
         Frames per second of the video.
-        For live sources, may return an estimate or a default value.
+        Falls back to 30.0 if the value cannot be determined.
         """
         fps = self.cap.get(cv2.CAP_PROP_FPS)
         if fps <= 0:
-            # Try to get from metadata or fallback
-            if self.is_live:
-                fps = 30.0  # Common fallback for webcams
-            else:
-                fps = 30.0  # arbitrary fallback
+            fps = 30.0
         return fps
 
     @property
@@ -120,7 +117,21 @@ class VideoReader:
 class WebcamReader(VideoReader):
     """
     Convenience class for webcam capture (camera index).
+
+    Parameters
+    ----------
+    camera_id : int, default 0
+        Index of the camera device.
+    width : int, optional
+        Desired capture width in pixels.
+    height : int, optional
+        Desired capture height in pixels.
+    resize : tuple, optional
+        If given, (width, height) to resize each frame after capture.
+    grayscale : bool, default False
+        If True, convert frames to grayscale.
     """
+
     def __init__(self, camera_id: int = 0,
                  width: Optional[int] = None,
                  height: Optional[int] = None,
