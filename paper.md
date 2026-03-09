@@ -147,6 +147,7 @@ $$\text{PERCLOS} = \frac{\text{frames with EAR} < 0.2}{\text{total frames}} \tim
 The author thanks the developers of MediaPipe, OpenCV, NumPy, and the broader
 scientific Python ecosystem. This work was motivated by the need for accessible
 neurological screening tools in resource-limited clinical environments in
-sub-Saharan Africa.
+sub-Saharan Africa. The author used AI assistance (Claude, Anthropic; DeepSeek)
+to support the drafting and editing of this paper and for minor code suggestions.
 
 # References
