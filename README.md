@@ -4,6 +4,7 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/Xcept-Health/EyeTrace/ci.yml?branch=main)](https://github.com/Xcept-Health/EyeTrace/actions)
 [![Documentation Status](https://readthedocs.org/projects/eyetrace/badge/?version=latest)](https://eyetrace.readthedocs.io/en/latest/?badge=latest)
+<a href="https://joss.theoj.org/papers/f0fceaea27a58675ed4e59499b9be103"><img src="https://joss.theoj.org/papers/f0fceaea27a58675ed4e59499b9be103/status.svg">
 
 > **The brain's state is written in your pupils.**  
 > EyeTrace is an open-source toolkit that decodes this language — extracting over 50 physiological and behavioral metrics from facial videos to assess fatigue, drowsiness, and cognitive load.
